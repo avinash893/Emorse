@@ -7,6 +7,8 @@ import { ok } from "./envolope";
 import { notFound } from "./middleware/notFound";
 import { error } from "node:console";
 import { errorHandler } from "./middleware/errorHandler";
+import { clerkMiddleware } from "@clerk/express";
+import { authRouter } from "./routes/auth/auth.routes";
 
 async function mainEntryFunction() {
   await connectDB();
@@ -15,10 +17,13 @@ async function mainEntryFunction() {
   app.use(cors({ origin: corsOrigins, credentials: true }));
   app.use(express.json());
   app.use(morgan("dev"));
+  app.use(clerkMiddleware());
 
   app.get("/api/health", (req, res) => {
     res.status(200).json(ok({ status: "ok" }));
   });
+
+  app.use("api/auth", authRouter);
 
   app.use(notFound);
   app.use(errorHandler);
